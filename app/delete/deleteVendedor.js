@@ -1,17 +1,15 @@
-const mysql = require('mysql');
-const connection = require('../db');
+const { pool } = require('../db');
 
-function deleteVendedor(req, res) {
-    const { id } = req.params;
-    
-    connection.query('CALL sp_eliven(?)', [id], (err, results) => {
-        if (err) {
-            console.error('Error al eliminar vendedor:', err);
-            res.status(500).json({ error: 'Error al eliminar vendedor' });
-            return;
-        }
+async function deleteVendedor(req, res) {
+    try {
+        const { id } = req.params;
+        
+        const [result] = await pool.query('CALL sp_delven(?)', [id]);
         res.json({ message: 'Vendedor eliminado correctamente' });
-    });
+    } catch (error) {
+        console.error('Error al eliminar vendedor:', error);
+        res.status(500).json({ error: 'Error al eliminar vendedor' });
+    }
 }
 
 module.exports = deleteVendedor; 

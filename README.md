@@ -1,12 +1,25 @@
 # Sistema de Gestión de Vendedores
 
-Este es un sistema web para la gestión de vendedores que permite realizar operaciones CRUD (Crear, Leer, Actualizar y Eliminar) sobre una base de datos MySQL.
+Este es un sistema web para la gestión de vendedores que permite realizar operaciones CRUD (Crear, Leer, Actualizar y Eliminar) sobre una base de datos MySQL, además de exportar los datos a Excel y PDF.
 
 ## Requisitos Previos
 
 - Node.js (v14 o superior)
 - MySQL (v8.0 o superior)
 - npm (incluido con Node.js)
+
+## Características
+
+- ✅ Registro de vendedores
+- ✅ Listado de vendedores
+- ✅ Búsqueda por nombre, apellido o celular
+- ✅ Edición de vendedores
+- ✅ Eliminación de vendedores
+- ✅ Validación de datos
+- ✅ Interfaz responsiva
+- ✅ Hot Reload en desarrollo
+- ✅ Exportación a Excel
+- ✅ Exportación a PDF
 
 ## Configuración de la Base de Datos
 
@@ -101,31 +114,47 @@ const pool = mysql.createPool({
   user: "tu-usuario",
   password: "tu-contraseña",
   port: 3306,
-  database: "railway"
+  database: "railway",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 ```
 
 ## Ejecución
 
-1. Inicia el servidor:
+El proyecto tiene dos modos de ejecución:
+
+### Modo Desarrollo
+Este modo incluye recarga automática cuando se detectan cambios en el código:
 ```bash
-cd app && node server.js
+npm run dev
 ```
 
-2. Abre tu navegador y visita:
+### Modo Producción
+Para ejecutar en modo producción:
+```bash
+npm start
+```
+
+Una vez iniciado, abre tu navegador y visita:
 ```
 http://localhost:3000
 ```
 
-## Características
+## Uso de la Aplicación
 
-- ✅ Registro de vendedores
-- ✅ Listado de vendedores
-- ✅ Búsqueda por nombre, apellido o celular
-- ✅ Edición de vendedores
-- ✅ Eliminación de vendedores
-- ✅ Validación de datos
-- ✅ Interfaz responsiva
+### Gestión de Vendedores
+- Para agregar un nuevo vendedor, completa el formulario en la parte superior
+- Para editar un vendedor, haz clic en el botón "Editar" en la fila correspondiente
+- Para eliminar un vendedor, haz clic en el botón "Eliminar" en la fila correspondiente
+- Para buscar vendedores, utiliza el campo de búsqueda que filtra por nombre, apellido o celular
+
+### Exportación de Datos
+- Para exportar a Excel, haz clic en el botón "Exportar Excel"
+  - Se descargará un archivo `Vendedores.xlsx` con todos los registros
+- Para exportar a PDF, haz clic en el botón "Exportar PDF"
+  - Se descargará un archivo `Vendedores.pdf` con un reporte formateado
 
 ## Tecnologías Utilizadas
 
@@ -133,10 +162,14 @@ http://localhost:3000
   - HTML5
   - CSS3 (Bootstrap 5)
   - JavaScript (Vanilla)
+  - Bootstrap Icons
 - Backend:
   - Node.js
   - Express.js
-  - MySQL2
+  - MySQL2 (con soporte para promesas)
+  - XLSX (para exportación a Excel)
+  - PDFMake (para exportación a PDF)
+  - Nodemon (desarrollo)
 - Base de Datos:
   - MySQL
 
@@ -150,10 +183,15 @@ node_clase/
 │   │   │   ├── main.js
 │   │   │   └── modals.js
 │   │   └── index.html
+│   ├── create/
+│   │   └── createVendedor.js
+│   ├── update/
+│   │   └── updateVendedor.js
+│   ├── delete/
+│   │   └── deleteVendedor.js
 │   ├── db.js
 │   └── server.js
 ├── package.json
-├── requirements.txt
 └── README.md
 ```
 

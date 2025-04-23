@@ -197,3 +197,65 @@ async function obtenerVendedor(id) {
     const response = await fetch(`/view/vendedor/${id}`);
     return await response.json();
 }
+
+async function exportarExcel() {
+    try {
+        const response = await fetch('/export/excel');
+        if (!response.ok) {
+            throw new Error('Error al exportar a Excel');
+        }
+        
+        // Create a blob from the response
+        const blob = await response.blob();
+        
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create a temporary link element
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Vendedores.xlsx';
+        
+        // Append to body, click and remove
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Release the blob URL
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error:', error);
+        Modals.error('Error', 'Error al exportar a Excel');
+    }
+}
+
+async function exportarPDF() {
+    try {
+        const response = await fetch('/export/pdf');
+        if (!response.ok) {
+            throw new Error('Error al exportar a PDF');
+        }
+        
+        // Create a blob from the response
+        const blob = await response.blob();
+        
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+        
+        // Create a temporary link element
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Vendedores.pdf';
+        
+        // Append to body, click and remove
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Release the blob URL
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Error:', error);
+        Modals.error('Error', 'Error al exportar a PDF');
+    }
+}

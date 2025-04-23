@@ -8,7 +8,7 @@ const pool = mysql.createPool({
   database: "railway",
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
+  queueLimit: 0
 });
 
 // Función para probar la conexión
@@ -32,5 +32,5 @@ async function testConnection() {
 // Ejecutar la prueba de conexión
 testConnection();
 
-module.exports = pool;
+module.exports = { pool };
 

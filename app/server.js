@@ -1,7 +1,9 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const pool = require('./db');
+const { pool } = require('./db');
+const XLSX = require('xlsx');
+const PdfPrinter = require('pdfmake');
 
 const app = express();
 const port = 3000;
@@ -132,6 +134,99 @@ app.delete('/delete/vendedor/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al eliminar vendedor:', error);
         res.status(500).json({ error: error.message || 'Error al eliminar vendedor' });
+    }
+});
+
+// Export to Excel
+app.get('/export/excel', async (req, res) => {
+    try {
+        const [vendedores] = await pool.query('SELECT * FROM vendedor');
+        
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(vendedores);
+        
+        // Set column headers
+        XLSX.utils.sheet_add_aoa(ws, [['ID', 'Nombre', 'Apellido', 'Celular']], { origin: 'A1' });
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Vendedores');
+        
+        // Generate buffer
+        const excelBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        
+        // Set headers for file download
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=Vendedores.xlsx');
+        
+        res.send(excelBuffer);
+    } catch (error) {
+        console.error('Error al exportar a Excel:', error);
+        res.status(500).json({ error: 'Error al exportar a Excel' });
+    }
+});
+
+// Export to PDF
+app.get('/export/pdf', async (req, res) => {
+    try {
+        const [vendedores] = await pool.query('SELECT * FROM vendedor');
+        
+        const fonts = {
+            Helvetica: {
+                normal: 'Helvetica',
+                bold: 'Helvetica-Bold',
+                italics: 'Helvetica-Oblique',
+                bolditalics: 'Helvetica-BoldOblique'
+            }
+        };
+        
+        const printer = new PdfPrinter(fonts);
+        
+        // Prepare data for the table
+        const tableBody = [
+            ['ID', 'Nombre', 'Apellido', 'Celular'], // headers
+            ...vendedores.map(v => [v.id_ven.toString(), v.nom_ven, v.apel_ven, v.cel_ven])
+        ];
+        
+        const docDefinition = {
+            content: [
+                { text: 'Lista de Vendedores', style: 'header' },
+                { text: `Fecha: ${new Date().toLocaleDateString()}`, style: 'subheader' },
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['auto', '*', '*', 'auto'],
+                        body: tableBody
+                    }
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                },
+                subheader: {
+                    fontSize: 12,
+                    margin: [0, 0, 0, 20]
+                }
+            },
+            defaultStyle: {
+                font: 'Helvetica'
+            }
+        };
+        
+        const pdfDoc = printer.createPdfKitDocument(docDefinition);
+        
+        // Set headers for file download
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=Vendedores.pdf');
+        
+        pdfDoc.pipe(res);
+        pdfDoc.end();
+    } catch (error) {
+        console.error('Error al exportar a PDF:', error);
+        res.status(500).json({ error: 'Error al exportar a PDF' });
     }
 });
 

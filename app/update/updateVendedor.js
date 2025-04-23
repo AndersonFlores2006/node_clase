@@ -1,18 +1,16 @@
-const mysql = require('mysql');
-const connection = require('../db');
+const { pool } = require('../db');
 
-function updateVendedor(req, res) {
-    const { id } = req.params;
-    const { nom_ven, ape_ven, cel_ven } = req.body;
-    
-    connection.query('CALL sp_modven(?, ?, ?, ?)', [id, nom_ven, ape_ven, cel_ven], (err, results) => {
-        if (err) {
-            console.error('Error al actualizar vendedor:', err);
-            res.status(500).json({ error: 'Error al actualizar vendedor' });
-            return;
-        }
+async function updateVendedor(req, res) {
+    try {
+        const { id } = req.params;
+        const { nom_ven, ape_ven, cel_ven } = req.body;
+        
+        const [result] = await pool.query('CALL sp_modven(?, ?, ?, ?)', [id, nom_ven, ape_ven, cel_ven]);
         res.json({ message: 'Vendedor actualizado correctamente' });
-    });
+    } catch (error) {
+        console.error('Error al actualizar vendedor:', error);
+        res.status(500).json({ error: 'Error al actualizar vendedor' });
+    }
 }
 
 module.exports = updateVendedor; 
