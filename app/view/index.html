@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Vendedores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Gestión de Vendedores</h2>
+        
+        <!-- Formulario de Registro -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Registrar Vendedor</h5>
+            </div>
+            <div class="card-body">
+                <form id="vendedorForm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="nom_ven" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="nom_ven" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="ape_ven" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" id="ape_ven" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="cel_ven" class="form-label">Celular</label>
+                                <input type="text" class="form-control" id="cel_ven" pattern="[0-9]{9}" maxlength="9" required 
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)"
+                                    title="El número debe tener exactamente 9 dígitos">
+                                <div class="form-text">El número debe tener exactamente 9 dígitos</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="reset" class="btn btn-secondary">Limpiar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Buscador -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre, apellido o celular...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="buscarVendedores()">
+                                <i class="bi bi-search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Vendedores -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Lista de Vendedores</h5>
+                <button class="btn btn-outline-primary btn-sm" onclick="cargarVendedores()">
+                    <i class="bi bi-arrow-clockwise"></i> Actualizar Lista
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Celular</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendedoresTableBody">
+                            <!-- Los vendedores se cargarán aquí dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/modals.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
