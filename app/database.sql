@@ -54,16 +54,16 @@ DELIMITER ;
 
 -- Procedimiento almacenado para eliminar (sp_eliven)
 DELIMITER //
-CREATE PROCEDURE sp_eliven(
+CREATE PROCEDURE sp_delven(
     IN p_id_ven INT
 )
 BEGIN
-    DELETE FROM Vendedor WHERE id_ven = p_id_ven;
+    DELETE FROM vendedor WHERE id_ven = p_id_ven;
     
     -- Reordenar IDs
     SET @num := 0;
-    UPDATE Vendedor SET id_ven = @num := (@num + 1) ORDER BY id_ven;
-    ALTER TABLE Vendedor AUTO_INCREMENT = 1;
+    UPDATE vendedor SET id_ven = @num := (@num + 1) ORDER BY id_ven;
+    ALTER TABLE vendedor AUTO_INCREMENT = 1;
 END //
 DELIMITER ;
 
