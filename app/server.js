@@ -1,12 +1,7 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql');
 const cors = require('cors');
-const connection = require('./db');
-
-const createVendedor = require('./create/createVendedor');
-const updateVendedor = require('./update/updateVendedor');
-const deleteVendedor = require('./delete/deleteVendedor');
+const pool = require('./db');
 
 const app = express();
 const port = 3000;
@@ -28,74 +23,117 @@ app.get('/', (req, res) => {
 });
 
 // CREATE
-app.post('/create/vendedor', createVendedor);
+app.post('/create/vendedor', async (req, res) => {
+    try {
+        const { nom_ven, apel_ven, cel_ven } = req.body;
+        
+        // Validaciones
+        if (!nom_ven || nom_ven.trim() === '') {
+            return res.status(400).json({ error: 'El nombre del vendedor no puede estar vacío' });
+        }
+        if (!apel_ven || apel_ven.trim() === '') {
+            return res.status(400).json({ error: 'El apellido del vendedor no puede estar vacío' });
+        }
+        if (!cel_ven || cel_ven.trim() === '' || cel_ven.length !== 9) {
+            return res.status(400).json({ error: 'El número de celular debe tener 9 dígitos' });
+        }
 
-// READ y SEARCH
-app.get('/view/vendedores/search', (req, res) => {
-    const searchTerm = req.query.term || '';
-    if (searchTerm === '') {
-        // Si no hay término de búsqueda, devolver todos los vendedores
-        connection.query('CALL sp_lisven()', (err, results) => {
-            if (err) {
-                console.error('Error al obtener vendedores:', err);
-                res.status(500).json({ error: 'Error al obtener vendedores' });
-                return;
-            }
-            res.json(results[0]);
-        });
-    } else {
-        // Si hay término de búsqueda, usar una consulta SQL directa
-        const query = `
-            SELECT * FROM Vendedor 
-            WHERE nom_ven LIKE ? 
-               OR ape_ven LIKE ? 
-               OR cel_ven LIKE ?
-            ORDER BY id_ven
-        `;
-        const searchPattern = `%${searchTerm}%`;
-        connection.query(query, [searchPattern, searchPattern, searchPattern], (err, results) => {
-            if (err) {
-                console.error('Error al buscar vendedores:', err);
-                res.status(500).json({ error: 'Error al buscar vendedores' });
-                return;
-            }
-            res.json(results);
-        });
+        const [result] = await pool.query('CALL sp_ingven(?, ?, ?)', [nom_ven, apel_ven, cel_ven]);
+        res.json({ success: true, id: result[0][0].nuevo_id_vendedor });
+    } catch (error) {
+        console.error('Error al crear vendedor:', error);
+        res.status(500).json({ error: error.message || 'Error al crear vendedor' });
     }
 });
 
-app.get('/view/vendedores', (req, res) => {
-    connection.query('CALL sp_lisven()', (err, results) => {
-        if (err) {
-            console.error('Error al obtener vendedores:', err);
-            res.status(500).json({ error: 'Error al obtener vendedores' });
-            return;
+// READ y SEARCH
+app.get('/view/vendedores/search', async (req, res) => {
+    try {
+        const searchTerm = req.query.term || '';
+        if (searchTerm === '') {
+            // Si no hay término de búsqueda, devolver todos los vendedores
+            const [results] = await pool.query('SELECT * FROM vendedor');
+            res.json(results);
+        } else {
+            // Si hay término de búsqueda, usar una consulta directa
+            const query = `
+                SELECT * FROM vendedor 
+                WHERE nom_ven LIKE ? 
+                   OR apel_ven LIKE ? 
+                   OR cel_ven LIKE ?
+                ORDER BY id_ven
+            `;
+            const searchPattern = `%${searchTerm}%`;
+            const [results] = await pool.query(query, [searchPattern, searchPattern, searchPattern]);
+            res.json(results);
         }
-        res.json(results[0]);
-    });
+    } catch (error) {
+        console.error('Error en la búsqueda:', error);
+        res.status(500).json({ error: 'Error al buscar vendedores' });
+    }
 });
 
-app.get('/view/vendedor/:id', (req, res) => {
-    const { id } = req.params;
-    connection.query('CALL sp_busven(?)', [id], (err, results) => {
-        if (err) {
-            console.error('Error al obtener vendedor:', err);
-            res.status(500).json({ error: 'Error al obtener vendedor' });
-            return;
-        }
-        if (!results[0] || results[0].length === 0) {
+app.get('/view/vendedores', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT * FROM vendedor');
+        res.json(results);
+    } catch (error) {
+        console.error('Error al obtener vendedores:', error);
+        res.status(500).json({ error: 'Error al obtener vendedores' });
+    }
+});
+
+app.get('/view/vendedor/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [results] = await pool.query('SELECT * FROM vendedor WHERE id_ven = ?', [id]);
+        if (results.length === 0) {
             res.status(404).json({ error: 'Vendedor no encontrado' });
             return;
         }
-        res.json(results[0][0]);
-    });
+        res.json(results[0]);
+    } catch (error) {
+        console.error('Error al obtener vendedor:', error);
+        res.status(500).json({ error: 'Error al obtener vendedor' });
+    }
 });
 
 // UPDATE
-app.put('/update/vendedor/:id', updateVendedor);
+app.put('/update/vendedor/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nom_ven, apel_ven, cel_ven } = req.body;
+
+        // Validaciones
+        if (!nom_ven || nom_ven.trim() === '') {
+            return res.status(400).json({ error: 'El nombre del vendedor no puede estar vacío' });
+        }
+        if (!apel_ven || apel_ven.trim() === '') {
+            return res.status(400).json({ error: 'El apellido del vendedor no puede estar vacío' });
+        }
+        if (!cel_ven || cel_ven.trim() === '' || cel_ven.length !== 9) {
+            return res.status(400).json({ error: 'El número de celular debe tener 9 dígitos' });
+        }
+
+        const [result] = await pool.query('CALL sp_modven(?, ?, ?, ?)', [id, nom_ven, apel_ven, cel_ven]);
+        res.json({ success: true, message: 'Vendedor actualizado correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar vendedor:', error);
+        res.status(500).json({ error: error.message || 'Error al actualizar vendedor' });
+    }
+});
 
 // DELETE
-app.delete('/delete/vendedor/:id', deleteVendedor);
+app.delete('/delete/vendedor/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [result] = await pool.query('CALL sp_delven(?)', [id]);
+        res.json({ success: true, message: 'Vendedor eliminado correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar vendedor:', error);
+        res.status(500).json({ error: error.message || 'Error al eliminar vendedor' });
+    }
+});
 
 // Iniciar servidor
 app.listen(port, () => {

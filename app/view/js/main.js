@@ -11,12 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const form = e.target;
         const vendedor = {
-            nom_ven: document.getElementById('nom_ven').value,
-            ape_ven: document.getElementById('ape_ven').value,
-            cel_ven: document.getElementById('cel_ven').value
+            nom_ven: document.getElementById('nom_ven').value.trim(),
+            apel_ven: document.getElementById('apel_ven').value.trim(),
+            cel_ven: document.getElementById('cel_ven').value.trim()
         };
 
-        // Validar número de celular
+        // Validaciones
+        if (!vendedor.nom_ven) {
+            Modals.error('Error de validación', 'El nombre del vendedor no puede estar vacío');
+            return;
+        }
+        if (!vendedor.apel_ven) {
+            Modals.error('Error de validación', 'El apellido del vendedor no puede estar vacío');
+            return;
+        }
         if (!/^[0-9]{9}$/.test(vendedor.cel_ven)) {
             Modals.error('Error de validación', 'El número de celular debe tener exactamente 9 dígitos');
             return;
@@ -100,7 +108,7 @@ function actualizarTablaVendedores(vendedores) {
         tr.innerHTML = `
             <td>${vendedor.id_ven}</td>
             <td>${vendedor.nom_ven}</td>
-            <td>${vendedor.ape_ven}</td>
+            <td>${vendedor.apel_ven}</td>
             <td>${vendedor.cel_ven}</td>
             <td>
                 <button class="btn btn-sm btn-warning" onclick="editarVendedor(${vendedor.id_ven})">Editar</button>
@@ -134,7 +142,7 @@ async function editarVendedor(id) {
         const vendedor = await response.json();
         
         document.getElementById('nom_ven').value = vendedor.nom_ven;
-        document.getElementById('ape_ven').value = vendedor.ape_ven;
+        document.getElementById('apel_ven').value = vendedor.apel_ven;
         document.getElementById('cel_ven').value = vendedor.cel_ven;
         
         // Cambiar el formulario para modo edición

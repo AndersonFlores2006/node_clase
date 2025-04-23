@@ -1,0 +1,4 @@
+express@5.1.0
+mysql2@3.9.2
+cors@2.8.5
+path@0.12.7 
