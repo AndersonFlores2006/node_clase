@@ -34,7 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             let response;
-            if (form.dataset.modo === 'editar') {
+            const esEdicion = form.dataset.modo === 'editar';
+            
+            if (esEdicion) {
                 // Modo edición
                 response = await fetch(`/api/vendedores/${form.dataset.id}`, {
                     method: 'PUT',
@@ -56,17 +58,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             if (response.ok) {
-                const mensaje = form.dataset.modo === 'editar' ? 'Vendedor actualizado correctamente' : 'Vendedor registrado correctamente';
-                Modals.exito('¡Éxito!', mensaje, () => {
-                    form.reset();
-                    form.dataset.modo = '';
-                    form.dataset.id = '';
-                    document.querySelector('button[type="submit"]').textContent = 'Guardar';
-                    cargarVendedores();
-                    // Cerrar el modal después de guardar
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('registroModal'));
-                    if (modal) modal.hide();
-                });
+                // Primero cerrar el modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('registroModal'));
+                if (modal) modal.hide();
+
+                // Luego actualizar la tabla
+                await cargarVendedores();
+
+                // Finalmente mostrar el mensaje de éxito
+                const titulo = esEdicion ? '¡Actualización Exitosa!' : '¡Registro Exitoso!';
+                const mensaje = esEdicion 
+                    ? `El vendedor ${vendedor.nom_ven} ${vendedor.apel_ven} ha sido actualizado correctamente.`
+                    : `El vendedor ${vendedor.nom_ven} ${vendedor.apel_ven} ha sido registrado correctamente.`;
+
+                Modals.exito(titulo, mensaje);
+
+                // Limpiar el formulario
+                form.reset();
+                form.dataset.modo = '';
+                form.dataset.id = '';
+                document.querySelector('button[type="submit"]').textContent = 'Guardar';
             } else {
                 Modals.error('Error', data.error || 'Error en la operación');
             }
@@ -74,6 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error:', error);
             Modals.error('Error de conexión', 'Error al conectar con el servidor');
         }
+    });
+
+    const registroModal = document.getElementById('registroModal');
+    registroModal.addEventListener('hidden.bs.modal', function () {
+        prepararNuevoVendedor();
     });
 });
 
@@ -200,27 +216,41 @@ async function editarVendedor(id) {
 }
 
 async function eliminarVendedor(id) {
-    Modals.confirmacion(
-        '¿Está seguro?', 
-        '¿Está seguro de eliminar este vendedor?',
-        async () => {
-            try {
-                const response = await fetch(`/api/vendedores/${id}`, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                    Modals.exito('¡Éxito!', 'Vendedor eliminado exitosamente', cargarVendedores);
-                } else {
-                    const error = await response.json();
-                    Modals.error('Error', error.error || 'Error al eliminar vendedor');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                Modals.error('Error de conexión', 'Error al conectar con el servidor');
-            }
+    try {
+        // Primero obtener los datos del vendedor
+        const response = await fetch(`/api/vendedores/${id}`);
+        if (!response.ok) {
+            throw new Error('Error al obtener datos del vendedor');
         }
-    );
+        const vendedor = await response.json();
+
+        Modals.confirmacion(
+            '¿Está seguro de eliminar?', 
+            `¿Está seguro que desea eliminar al vendedor ${vendedor.nom_ven} ${vendedor.apel_ven}?`,
+            async () => {
+                try {
+                    const deleteResponse = await fetch(`/api/vendedores/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (deleteResponse.ok) {
+                        await cargarVendedores();
+                        Modals.exito('¡Eliminación Exitosa!', 
+                            `El vendedor ${vendedor.nom_ven} ${vendedor.apel_ven} ha sido eliminado correctamente.`);
+                    } else {
+                        const error = await deleteResponse.json();
+                        Modals.error('Error', error.error || 'Error al eliminar vendedor');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Modals.error('Error de conexión', 'Error al conectar con el servidor');
+                }
+            }
+        );
+    } catch (error) {
+        console.error('Error:', error);
+        Modals.error('Error', 'No se pudo obtener la información del vendedor');
+    }
 }
 
 // Función debounce para evitar muchas peticiones durante la búsqueda
@@ -292,4 +322,18 @@ async function exportarPDF() {
         console.error('Error:', error);
         Modals.error('Error', 'Error al exportar a PDF');
     }
+}
+
+function prepararNuevoVendedor() {
+    const form = document.getElementById('vendedorForm');
+    form.reset();
+    form.dataset.modo = '';
+    form.dataset.id = '';
+    document.querySelector('button[type="submit"]').textContent = 'Guardar';
+    
+    // Limpiar los campos manualmente
+    document.getElementById('nom_ven').value = '';
+    document.getElementById('apel_ven').value = '';
+    document.getElementById('cel_ven').value = '';
+    document.getElementById('distrito').value = '';
 } 
