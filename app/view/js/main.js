@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     cargarVendedores();
+    cargarDistritos();
     
     // Configurar el buscador
     const searchInput = document.getElementById('searchInput');
@@ -13,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const vendedor = {
             nom_ven: document.getElementById('nom_ven').value.trim(),
             apel_ven: document.getElementById('apel_ven').value.trim(),
-            cel_ven: document.getElementById('cel_ven').value.trim()
+            cel_ven: document.getElementById('cel_ven').value.trim(),
+            id_distrito: document.getElementById('distrito').value.trim() || null
         };
 
         // Validaciones
@@ -61,6 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     form.dataset.id = '';
                     document.querySelector('button[type="submit"]').textContent = 'Guardar';
                     cargarVendedores();
+                    // Cerrar el modal después de guardar
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('registroModal'));
+                    if (modal) modal.hide();
                 });
             } else {
                 Modals.error('Error', data.error || 'Error en la operación');
@@ -110,6 +115,7 @@ function actualizarTablaVendedores(vendedores) {
             <td>${vendedor.nom_ven}</td>
             <td>${vendedor.apel_ven}</td>
             <td>${vendedor.cel_ven}</td>
+            <td>${vendedor.distrito}</td>
             <td>
                 <button class="btn btn-sm btn-warning" onclick="editarVendedor(${vendedor.id_ven})">Editar</button>
                 <button class="btn btn-sm btn-danger" onclick="eliminarVendedor(${vendedor.id_ven})">Eliminar</button>
@@ -117,6 +123,32 @@ function actualizarTablaVendedores(vendedores) {
         `;
         tbody.appendChild(tr);
     });
+}
+
+async function cargarDistritos() {
+    try {
+        const response = await fetch('/view/distritos');
+        if (!response.ok) {
+            throw new Error('Error al cargar distritos');
+        }
+        const distritos = await response.json();
+        const selectDistrito = document.getElementById('distrito');
+        
+        // Mantener la opción por defecto
+        const defaultOption = selectDistrito.firstElementChild;
+        selectDistrito.innerHTML = '';
+        selectDistrito.appendChild(defaultOption);
+        
+        distritos.forEach(distrito => {
+            const option = document.createElement('option');
+            option.value = distrito.id_distrito;
+            option.textContent = distrito.nombre;
+            selectDistrito.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        Modals.error('Error', 'Error al cargar los distritos');
+    }
 }
 
 async function cargarVendedores() {
@@ -144,12 +176,17 @@ async function editarVendedor(id) {
         document.getElementById('nom_ven').value = vendedor.nom_ven;
         document.getElementById('apel_ven').value = vendedor.apel_ven;
         document.getElementById('cel_ven').value = vendedor.cel_ven;
+        document.getElementById('distrito').value = vendedor.id_distrito || '';
         
         // Cambiar el formulario para modo edición
         const form = document.getElementById('vendedorForm');
         form.dataset.modo = 'editar';
         form.dataset.id = id;
         document.querySelector('button[type="submit"]').textContent = 'Actualizar';
+        
+        // Mostrar el modal de edición
+        const modal = new bootstrap.Modal(document.getElementById('registroModal'));
+        modal.show();
     } catch (error) {
         console.error('Error:', error);
         Modals.error('Error', 'Error al cargar datos del vendedor');

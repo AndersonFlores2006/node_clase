@@ -11,39 +11,64 @@
     <div class="container mt-5">
         <h2 class="mb-4">Gestión de Vendedores</h2>
         
-        <!-- Formulario de Registro -->
+        <!-- Botón para abrir el modal de registro -->
         <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="card-title mb-0">Registrar Vendedor</h5>
-            </div>
             <div class="card-body">
-                <form id="vendedorForm">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="nom_ven" class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="nom_ven" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="apel_ven" class="form-label">Apellido</label>
-                                <input type="text" class="form-control" id="apel_ven" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="cel_ven" class="form-label">Celular</label>
-                                <input type="text" class="form-control" id="cel_ven" pattern="[0-9]{9}" maxlength="9" required 
-                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)"
-                                    title="El número debe tener exactamente 9 dígitos">
-                                <div class="form-text">El número debe tener exactamente 9 dígitos</div>
-                            </div>
-                        </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registroModal">
+                    <i class="bi bi-person-plus"></i> Registrar Nuevo Vendedor
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal de Registro -->
+        <div class="modal fade" id="registroModal" tabindex="-1" aria-labelledby="registroModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="registroModalLabel">Registrar Vendedor</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <button type="reset" class="btn btn-secondary">Limpiar</button>
-                </form>
+                    <div class="modal-body">
+                        <form id="vendedorForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="nom_ven" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="nom_ven" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="apel_ven" class="form-label">Apellido</label>
+                                        <input type="text" class="form-control" id="apel_ven" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="cel_ven" class="form-label">Celular</label>
+                                        <input type="text" class="form-control" id="cel_ven" pattern="[0-9]{9}" maxlength="9" required 
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)"
+                                            title="El número debe tener exactamente 9 dígitos">
+                                        <div class="form-text">El número debe tener exactamente 9 dígitos</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="distrito" class="form-label">Distrito</label>
+                                        <select class="form-select" id="distrito" required>
+                                            <option value="">Seleccione un distrito</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                                <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -53,7 +78,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="input-group">
-                            <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre, apellido o celular...">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nombre, apellido, celular o distrito...">
                             <button class="btn btn-outline-secondary" type="button" onclick="buscarVendedores()">
                                 <i class="bi bi-search"></i> Buscar
                             </button>
@@ -88,6 +113,7 @@
                                 <th>Nombre</th>
                                 <th>Apellido</th>
                                 <th>Celular</th>
+                                <th>Distrito</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>

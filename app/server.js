@@ -24,10 +24,21 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'view', 'index.html'));
 });
 
+// Ruta para obtener distritos
+app.get('/view/distritos', async (req, res) => {
+    try {
+        const [results] = await pool.query('CALL sp_lisdistritos()');
+        res.json(results[0]);
+    } catch (error) {
+        console.error('Error al obtener distritos:', error);
+        res.status(500).json({ error: 'Error al obtener distritos' });
+    }
+});
+
 // CREATE
 app.post('/create/vendedor', async (req, res) => {
     try {
-        const { nom_ven, apel_ven, cel_ven } = req.body;
+        const { nom_ven, apel_ven, cel_ven, id_distrito } = req.body;
         
         // Validaciones
         if (!nom_ven || nom_ven.trim() === '') {
@@ -40,7 +51,8 @@ app.post('/create/vendedor', async (req, res) => {
             return res.status(400).json({ error: 'El número de celular debe tener 9 dígitos' });
         }
 
-        const [result] = await pool.query('CALL sp_ingven(?, ?, ?)', [nom_ven, apel_ven, cel_ven]);
+        // Ejecutar el procedimiento almacenado con los parámetros correctos
+        const [result] = await pool.query('CALL sp_ingven(?, ?, ?, ?)', [nom_ven, apel_ven, cel_ven, id_distrito || null]);
         res.json({ success: true, id: result[0][0].nuevo_id_vendedor });
     } catch (error) {
         console.error('Error al crear vendedor:', error);
@@ -52,23 +64,8 @@ app.post('/create/vendedor', async (req, res) => {
 app.get('/view/vendedores/search', async (req, res) => {
     try {
         const searchTerm = req.query.term || '';
-        if (searchTerm === '') {
-            // Si no hay término de búsqueda, devolver todos los vendedores
-            const [results] = await pool.query('SELECT * FROM vendedor');
-            res.json(results);
-        } else {
-            // Si hay término de búsqueda, usar una consulta directa
-            const query = `
-                SELECT * FROM vendedor 
-                WHERE nom_ven LIKE ? 
-                   OR apel_ven LIKE ? 
-                   OR cel_ven LIKE ?
-                ORDER BY id_ven
-            `;
-            const searchPattern = `%${searchTerm}%`;
-            const [results] = await pool.query(query, [searchPattern, searchPattern, searchPattern]);
-            res.json(results);
-        }
+        const [results] = await pool.query('CALL sp_searchven(?)', [searchTerm]);
+        res.json(results[0]);
     } catch (error) {
         console.error('Error en la búsqueda:', error);
         res.status(500).json({ error: 'Error al buscar vendedores' });
@@ -77,8 +74,8 @@ app.get('/view/vendedores/search', async (req, res) => {
 
 app.get('/view/vendedores', async (req, res) => {
     try {
-        const [results] = await pool.query('SELECT * FROM vendedor');
-        res.json(results);
+        const [results] = await pool.query('CALL sp_lisven()');
+        res.json(results[0]);
     } catch (error) {
         console.error('Error al obtener vendedores:', error);
         res.status(500).json({ error: 'Error al obtener vendedores' });
@@ -88,7 +85,7 @@ app.get('/view/vendedores', async (req, res) => {
 app.get('/view/vendedor/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const [results] = await pool.query('SELECT * FROM vendedor WHERE id_ven = ?', [id]);
+        const [results] = await pool.query('CALL sp_busven(?)', [id]);
         if (results.length === 0) {
             res.status(404).json({ error: 'Vendedor no encontrado' });
             return;
@@ -104,7 +101,7 @@ app.get('/view/vendedor/:id', async (req, res) => {
 app.put('/update/vendedor/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { nom_ven, apel_ven, cel_ven } = req.body;
+        const { nom_ven, apel_ven, cel_ven, id_distrito } = req.body;
 
         // Validaciones
         if (!nom_ven || nom_ven.trim() === '') {
@@ -117,7 +114,7 @@ app.put('/update/vendedor/:id', async (req, res) => {
             return res.status(400).json({ error: 'El número de celular debe tener 9 dígitos' });
         }
 
-        const [result] = await pool.query('CALL sp_modven(?, ?, ?, ?)', [id, nom_ven, apel_ven, cel_ven]);
+        const [result] = await pool.query('CALL sp_modven(?, ?, ?, ?, ?)', [id, nom_ven, apel_ven, cel_ven, id_distrito || null]);
         res.json({ success: true, message: 'Vendedor actualizado correctamente' });
     } catch (error) {
         console.error('Error al actualizar vendedor:', error);
@@ -140,7 +137,7 @@ app.delete('/delete/vendedor/:id', async (req, res) => {
 // Export to Excel
 app.get('/export/excel', async (req, res) => {
     try {
-        const [vendedores] = await pool.query('SELECT * FROM vendedor');
+        const [vendedores] = await pool.query('SELECT * FROM Vendedor');
         
         // Create workbook and worksheet
         const wb = XLSX.utils.book_new();
@@ -169,7 +166,7 @@ app.get('/export/excel', async (req, res) => {
 // Export to PDF
 app.get('/export/pdf', async (req, res) => {
     try {
-        const [vendedores] = await pool.query('SELECT * FROM vendedor');
+        const [vendedores] = await pool.query('SELECT * FROM Vendedor');
         
         const fonts = {
             Helvetica: {
@@ -233,4 +230,5 @@ app.get('/export/pdf', async (req, res) => {
 // Iniciar servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
-}); 
+    console.log('IMPORTANTE: Asegúrate de ejecutar el script railway_procedures.sql para crear los procedimientos almacenados necesarios');
+});
