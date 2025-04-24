@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let response;
             if (form.dataset.modo === 'editar') {
                 // Modo edición
-                response = await fetch(`/update/vendedor/${form.dataset.id}`, {
+                response = await fetch(`/api/vendedores/${form.dataset.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 // Modo creación
-                response = await fetch('/create/vendedor', {
+                response = await fetch('/api/vendedores', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function buscarVendedores() {
     try {
         const searchTerm = document.getElementById('searchInput').value.trim();
-        const response = await fetch(`/view/vendedores/search?term=${encodeURIComponent(searchTerm)}`);
+        const response = await fetch(`/api/vendedores/search?term=${encodeURIComponent(searchTerm)}`);
         
         if (!response.ok) {
             throw new Error('Error al buscar vendedores');
@@ -153,7 +153,7 @@ async function cargarDistritos() {
 
 async function cargarVendedores() {
     try {
-        const response = await fetch('/view/vendedores');
+        const response = await fetch('/api/vendedores');
         if (!response.ok) {
             throw new Error('Error al cargar vendedores');
         }
@@ -167,28 +167,34 @@ async function cargarVendedores() {
 
 async function editarVendedor(id) {
     try {
-        const response = await fetch(`/view/vendedor/${id}`);
+        const response = await fetch(`/api/vendedores/${id}`);
         if (!response.ok) {
             throw new Error('Error al obtener vendedor');
         }
         const vendedor = await response.json();
-        
-        document.getElementById('nom_ven').value = vendedor.nom_ven;
-        document.getElementById('apel_ven').value = vendedor.apel_ven;
-        document.getElementById('cel_ven').value = vendedor.cel_ven;
-        document.getElementById('distrito').value = vendedor.id_distrito || '';
-        
-        // Cambiar el formulario para modo edición
-        const form = document.getElementById('vendedorForm');
-        form.dataset.modo = 'editar';
-        form.dataset.id = id;
-        document.querySelector('button[type="submit"]').textContent = 'Actualizar';
-        
-        // Mostrar el modal de edición
-        const modal = new bootstrap.Modal(document.getElementById('registroModal'));
-        modal.show();
+        console.log('Datos del vendedor recibidos:', vendedor); // Log para depuración
+
+        // Verificar que los datos existen antes de asignarlos
+        if (vendedor) {
+            document.getElementById('nom_ven').value = vendedor.nom_ven || '';
+            document.getElementById('apel_ven').value = vendedor.apel_ven || '';
+            document.getElementById('cel_ven').value = vendedor.cel_ven || '';
+            document.getElementById('distrito').value = vendedor.id_distrito || '';
+            
+            // Cambiar el formulario para modo edición
+            const form = document.getElementById('vendedorForm');
+            form.dataset.modo = 'editar';
+            form.dataset.id = id;
+            document.querySelector('button[type="submit"]').textContent = 'Actualizar';
+            
+            // Mostrar el modal de edición
+            const modal = new bootstrap.Modal(document.getElementById('registroModal'));
+            modal.show();
+        } else {
+            throw new Error('No se recibieron datos del vendedor');
+        }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al cargar vendedor:', error);
         Modals.error('Error', 'Error al cargar datos del vendedor');
     }
 }
@@ -199,7 +205,7 @@ async function eliminarVendedor(id) {
         '¿Está seguro de eliminar este vendedor?',
         async () => {
             try {
-                const response = await fetch(`/delete/vendedor/${id}`, {
+                const response = await fetch(`/api/vendedores/${id}`, {
                     method: 'DELETE'
                 });
 
@@ -230,11 +236,6 @@ function debounce(func, wait) {
     };
 }
 
-async function obtenerVendedor(id) {
-    const response = await fetch(`/view/vendedor/${id}`);
-    return await response.json();
-}
-
 async function exportarExcel() {
     try {
         const response = await fetch('/export/excel');
@@ -248,18 +249,16 @@ async function exportarExcel() {
         // Create a temporary URL for the blob
         const url = window.URL.createObjectURL(blob);
         
-        // Create a temporary link element
+        // Create a link element and trigger download
         const a = document.createElement('a');
         a.href = url;
         a.download = 'Vendedores.xlsx';
-        
-        // Append to body, click and remove
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
         
-        // Release the blob URL
+        // Clean up
         window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
     } catch (error) {
         console.error('Error:', error);
         Modals.error('Error', 'Error al exportar a Excel');
@@ -279,20 +278,18 @@ async function exportarPDF() {
         // Create a temporary URL for the blob
         const url = window.URL.createObjectURL(blob);
         
-        // Create a temporary link element
+        // Create a link element and trigger download
         const a = document.createElement('a');
         a.href = url;
         a.download = 'Vendedores.pdf';
-        
-        // Append to body, click and remove
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
         
-        // Release the blob URL
+        // Clean up
         window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
     } catch (error) {
         console.error('Error:', error);
         Modals.error('Error', 'Error al exportar a PDF');
     }
-}
+} 

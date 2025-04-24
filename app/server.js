@@ -5,24 +5,19 @@ const { pool } = require('./db');
 const XLSX = require('xlsx');
 const PdfPrinter = require('pdfmake');
 
+// Importar rutas
+const vendedorRoutes = require('./routes/vendedorRoutes');
+
 const app = express();
 const port = 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'view')));
-
-// Manejo de errores
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Algo salió mal!' });
-});
+app.use(express.static(path.join(__dirname, 'views')));
 
 // Rutas
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'view', 'index.html'));
-});
+app.use('/api/vendedores', vendedorRoutes);
 
 // Ruta para obtener distritos
 app.get('/view/distritos', async (req, res) => {
@@ -32,105 +27,6 @@ app.get('/view/distritos', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener distritos:', error);
         res.status(500).json({ error: 'Error al obtener distritos' });
-    }
-});
-
-// CREATE
-app.post('/create/vendedor', async (req, res) => {
-    try {
-        const { nom_ven, apel_ven, cel_ven, id_distrito } = req.body;
-        
-        // Validaciones
-        if (!nom_ven || nom_ven.trim() === '') {
-            return res.status(400).json({ error: 'El nombre del vendedor no puede estar vacío' });
-        }
-        if (!apel_ven || apel_ven.trim() === '') {
-            return res.status(400).json({ error: 'El apellido del vendedor no puede estar vacío' });
-        }
-        if (!cel_ven || cel_ven.trim() === '' || cel_ven.length !== 9) {
-            return res.status(400).json({ error: 'El número de celular debe tener 9 dígitos' });
-        }
-
-        // Ejecutar el procedimiento almacenado con los parámetros correctos
-        const [result] = await pool.query('CALL sp_ingven(?, ?, ?, ?)', [nom_ven, apel_ven, cel_ven, id_distrito || null]);
-        res.json({ success: true, id: result[0][0].nuevo_id_vendedor });
-    } catch (error) {
-        console.error('Error al crear vendedor:', error);
-        res.status(500).json({ error: error.message || 'Error al crear vendedor' });
-    }
-});
-
-// READ y SEARCH
-app.get('/view/vendedores/search', async (req, res) => {
-    try {
-        const searchTerm = req.query.term || '';
-        const [results] = await pool.query('CALL sp_searchven(?)', [searchTerm]);
-        res.json(results[0]);
-    } catch (error) {
-        console.error('Error en la búsqueda:', error);
-        res.status(500).json({ error: 'Error al buscar vendedores' });
-    }
-});
-
-app.get('/view/vendedores', async (req, res) => {
-    try {
-        const [results] = await pool.query('CALL sp_lisven()');
-        res.json(results[0]);
-    } catch (error) {
-        console.error('Error al obtener vendedores:', error);
-        res.status(500).json({ error: 'Error al obtener vendedores' });
-    }
-});
-
-app.get('/view/vendedor/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const [results] = await pool.query('CALL sp_busven(?)', [id]);
-        if (results.length === 0) {
-            res.status(404).json({ error: 'Vendedor no encontrado' });
-            return;
-        }
-        res.json(results[0]);
-    } catch (error) {
-        console.error('Error al obtener vendedor:', error);
-        res.status(500).json({ error: 'Error al obtener vendedor' });
-    }
-});
-
-// UPDATE
-app.put('/update/vendedor/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { nom_ven, apel_ven, cel_ven, id_distrito } = req.body;
-
-        // Validaciones
-        if (!nom_ven || nom_ven.trim() === '') {
-            return res.status(400).json({ error: 'El nombre del vendedor no puede estar vacío' });
-        }
-        if (!apel_ven || apel_ven.trim() === '') {
-            return res.status(400).json({ error: 'El apellido del vendedor no puede estar vacío' });
-        }
-        if (!cel_ven || cel_ven.trim() === '' || cel_ven.length !== 9) {
-            return res.status(400).json({ error: 'El número de celular debe tener 9 dígitos' });
-        }
-
-        const [result] = await pool.query('CALL sp_modven(?, ?, ?, ?, ?)', [id, nom_ven, apel_ven, cel_ven, id_distrito || null]);
-        res.json({ success: true, message: 'Vendedor actualizado correctamente' });
-    } catch (error) {
-        console.error('Error al actualizar vendedor:', error);
-        res.status(500).json({ error: error.message || 'Error al actualizar vendedor' });
-    }
-});
-
-// DELETE
-app.delete('/delete/vendedor/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const [result] = await pool.query('CALL sp_delven(?)', [id]);
-        res.json({ success: true, message: 'Vendedor eliminado correctamente' });
-    } catch (error) {
-        console.error('Error al eliminar vendedor:', error);
-        res.status(500).json({ error: error.message || 'Error al eliminar vendedor' });
     }
 });
 
@@ -225,6 +121,17 @@ app.get('/export/pdf', async (req, res) => {
         console.error('Error al exportar a PDF:', error);
         res.status(500).json({ error: 'Error al exportar a PDF' });
     }
+});
+
+// Ruta principal
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+// Manejo de errores
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Algo salió mal!' });
 });
 
 // Iniciar servidor
