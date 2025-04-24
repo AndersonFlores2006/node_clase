@@ -224,9 +224,11 @@ async function eliminarVendedor(id) {
         }
         const vendedor = await response.json();
 
+        // Mostrar confirmación
         Modals.confirmacion(
             '¿Está seguro de eliminar?', 
             `¿Está seguro que desea eliminar al vendedor ${vendedor.nom_ven} ${vendedor.apel_ven}?`,
+            // Función que se ejecuta si el usuario confirma
             async () => {
                 try {
                     const deleteResponse = await fetch(`/api/vendedores/${id}`, {
@@ -234,7 +236,9 @@ async function eliminarVendedor(id) {
                     });
 
                     if (deleteResponse.ok) {
+                        // Primero actualizar la tabla
                         await cargarVendedores();
+                        // Luego mostrar mensaje de éxito
                         Modals.exito('¡Eliminación Exitosa!', 
                             `El vendedor ${vendedor.nom_ven} ${vendedor.apel_ven} ha sido eliminado correctamente.`);
                     } else {
@@ -242,13 +246,17 @@ async function eliminarVendedor(id) {
                         Modals.error('Error', error.error || 'Error al eliminar vendedor');
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error al eliminar:', error);
                     Modals.error('Error de conexión', 'Error al conectar con el servidor');
                 }
+            },
+            // Función que se ejecuta si el usuario cancela
+            () => {
+                console.log('Eliminación cancelada por el usuario');
             }
         );
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al obtener datos:', error);
         Modals.error('Error', 'No se pudo obtener la información del vendedor');
     }
 }
