@@ -107,13 +107,13 @@ npm install
 
 4. Configura la conexión a la base de datos:
    - Abre el archivo `app/db.js`
-   - Modifica los datos de conexión según tu configuración:
+   - La configuración actual está configurada para Railway:
 ```javascript
 const pool = mysql.createPool({
-  host: "tu-host",
-  user: "tu-usuario",
-  password: "tu-contraseña",
-  port: 3306,
+  host: "metro.proxy.rlwy.net",
+  user: "root",
+  password: "CaCCQPMlJGquCrnImlacApdzKmACfHui",
+  port: 41613,
   database: "railway",
   waitForConnections: true,
   connectionLimit: 10,
@@ -171,7 +171,7 @@ http://localhost:3000
   - PDFMake (para exportación a PDF)
   - Nodemon (desarrollo)
 - Base de Datos:
-  - MySQL
+  - MySQL (Railway)
 
 ## Estructura del Proyecto
 
@@ -192,18 +192,18 @@ node_clase/
 │   ├── db.js
 │   └── server.js
 ├── package.json
+├── requirements.txt
 └── README.md
 ```
 
 ## Contribución
 
 Si deseas contribuir al proyecto:
-
-1. Haz un Fork del repositorio
-2. Crea una rama para tu característica (`git checkout -b feature/nueva-caracteristica`)
-3. Haz commit de tus cambios (`git commit -am 'Agrega nueva característica'`)
-4. Haz push a la rama (`git push origin feature/nueva-caracteristica`)
-5. Crea un Pull Request
+1. Haz un fork del repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
 ## Licencia
 
