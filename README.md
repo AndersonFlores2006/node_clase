@@ -27,6 +27,8 @@ NODE_ENV=development
 PORT=3000
 ```
 
+⚠️ Nota de Seguridad: Nunca subas el archivo .env al repositorio. Las variables de entorno sensibles en producción deben configurarse directamente en el panel de control de Render.
+
 ## Características
 
 * ✅ Registro de vendedores con información completa
