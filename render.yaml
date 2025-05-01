@@ -7,15 +7,15 @@ services:
     startCommand: node app/server.js
     envVars:
       - key: DB_HOST
-        value: metro.proxy.rlwy.net
+        sync: false
       - key: DB_USER
-        value: root
+        sync: false
       - key: DB_PASSWORD
-        value: CaCCQPMlJGquCrnImlacApdzKmACfHui
+        sync: false
       - key: DB_PORT
-        value: "41613"
+        sync: false
       - key: DB_DATABASE
-        value: railway
+        sync: false
       - key: DB_CONNECTION_LIMIT
         value: "10"
       - key: NODE_ENV

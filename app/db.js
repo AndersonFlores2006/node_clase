@@ -1,13 +1,21 @@
 require('dotenv').config();
 const mysql = require("mysql2/promise");
 
-// Verificar y mostrar la configuración
+// Verificar que todas las variables de entorno necesarias estén definidas
+const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_PORT', 'DB_DATABASE'];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    throw new Error(`La variable de entorno ${envVar} es requerida`);
+  }
+}
+
+// Configuración de la base de datos usando solo variables de entorno
 const config = {
-  host: process.env.DB_HOST || 'metro.proxy.rlwy.net',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'CaCCQPMlJGquCrnImlacApdzKmACfHui',
-  port: parseInt(process.env.DB_PORT || '41613'),
-  database: process.env.DB_DATABASE || 'railway',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  port: parseInt(process.env.DB_PORT),
+  database: process.env.DB_DATABASE,
   waitForConnections: true,
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
   queueLimit: 0,
@@ -15,7 +23,7 @@ const config = {
   keepAliveInitialDelay: 0
 };
 
-console.log('Configuración de la base de datos:');
+console.log('Configuración de la base de datos inicializada');
 console.log('Host:', config.host);
 console.log('Port:', config.port);
 console.log('Database:', config.database);
