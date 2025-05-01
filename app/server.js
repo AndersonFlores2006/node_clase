@@ -1,9 +1,17 @@
+// Cargar variables de entorno al inicio
+require('dotenv').config();
+
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const { pool } = require('./db');
+const { pool, testConnection } = require('./db');
 const XLSX = require('xlsx');
 const PdfPrinter = require('pdfmake');
+
+// Verificar variables de entorno críticas
+console.log('Variables de entorno del servidor:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', process.env.PORT);
 
 // Importar rutas
 const vendedorRoutes = require('./routes/vendedorRoutes');

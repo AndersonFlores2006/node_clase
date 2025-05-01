@@ -2,24 +2,25 @@ services:
   - type: web
     name: node-clase
     env: node
+    region: ohio
     buildCommand: npm install
     startCommand: node app/server.js
     envVars:
       - key: DB_HOST
-        value: metro.proxy.rlwy.net
+        sync: false
       - key: DB_USER
-        value: root
+        sync: false
       - key: DB_PASSWORD
-        value: CaCCQPMlJGquCrnImlacApdzKmACfHui
+        sync: false
       - key: DB_PORT
-        value: 41613
+        sync: false
       - key: DB_DATABASE
-        value: railway
+        sync: false
       - key: DB_CONNECTION_LIMIT
-        value: 10
+        value: "10"
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3000
+        value: "3000"
     healthCheckPath: /
     autoDeploy: true 
