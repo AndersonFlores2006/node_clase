@@ -2,18 +2,24 @@ services:
   - type: web
     name: node-clase
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: npm install
+    startCommand: node app/server.js
     envVars:
-      - key: MYSQL_HOST
-        value: ${MYSQL_HOST}
-      - key: MYSQL_USER
-        value: ${MYSQL_USER}
-      - key: MYSQL_PASSWORD
-        value: ${MYSQL_PASSWORD}
-      - key: MYSQL_DATABASE
-        value: ${MYSQL_DATABASE}
+      - key: DB_HOST
+        value: metro.proxy.rlwy.net
+      - key: DB_USER
+        value: root
+      - key: DB_PASSWORD
+        value: CaCCQPMlJGquCrnImlacApdzKmACfHui
+      - key: DB_PORT
+        value: 41613
+      - key: DB_DATABASE
+        value: railway
+      - key: DB_CONNECTION_LIMIT
+        value: 10
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 3000
     healthCheckPath: /
     autoDeploy: true 

@@ -9,11 +9,14 @@ const PdfPrinter = require('pdfmake');
 const vendedorRoutes = require('./routes/vendedorRoutes');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Servir archivos estáticos
 app.use(express.static(path.join(__dirname, 'views')));
 
 // Rutas
@@ -135,7 +138,7 @@ app.use((err, req, res, next) => {
 });
 
 // Iniciar servidor
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
     console.log('IMPORTANTE: Asegúrate de ejecutar el script railway_procedures.sql para crear los procedimientos almacenados necesarios');
 });
