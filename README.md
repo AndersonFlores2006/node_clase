@@ -29,6 +29,9 @@ PORT=3000
 
 ⚠️ Nota de Seguridad: Nunca subas el archivo .env al repositorio. Las variables de entorno sensibles en producción deben configurarse directamente en el panel de control de Render.
 
+## Despliegue Automático
+Este proyecto está configurado con GitHub Actions para despliegue automático en Render cuando se hace push a la rama main.
+
 ## Características
 
 * ✅ Registro de vendedores con información completa
