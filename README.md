@@ -4,201 +4,159 @@ Este es un sistema web para la gestión de vendedores que permite realizar opera
 
 ## Requisitos Previos
 
-- Node.js (v14 o superior)
-- MySQL (v8.0 o superior)
-- npm (incluido con Node.js)
+* Node.js (v14 o superior)
+* MySQL (v8.0 o superior)
+* npm (incluido con Node.js)
+* Docker y Docker Compose (opcional, para desarrollo con contenedores)
 
 ## Características
 
-- ✅ Registro de vendedores
-- ✅ Listado de vendedores
-- ✅ Búsqueda por nombre, apellido o celular
-- ✅ Edición de vendedores
-- ✅ Eliminación de vendedores
-- ✅ Validación de datos
-- ✅ Interfaz responsiva
-- ✅ Hot Reload en desarrollo
-- ✅ Exportación a Excel
-- ✅ Exportación a PDF
+* ✅ Registro de vendedores con información completa
+* ✅ Asignación de distritos a vendedores
+* ✅ Asignación de cargos a vendedores
+* ✅ Listado de vendedores con filtros
+* ✅ Búsqueda por nombre, apellido, distrito o celular
+* ✅ Edición de vendedores
+* ✅ Eliminación de vendedores
+* ✅ Validación de datos
+* ✅ Interfaz responsiva
+* ✅ Hot Reload en desarrollo
+* ✅ Exportación a Excel
+* ✅ Exportación a PDF
+* ✅ Gestión de distritos
+* ✅ Gestión de cargos
 
-## Configuración de la Base de Datos
-
-1. Asegúrate de tener MySQL instalado y ejecutándose
-2. Crea una base de datos llamada `railway` en MySQL
-3. Ejecuta el siguiente script SQL para crear la tabla y los procedimientos almacenados:
-
-```sql
-USE railway;
-
--- Eliminar procedimientos existentes
-DROP PROCEDURE IF EXISTS sp_busven;
-DROP PROCEDURE IF EXISTS sp_delven;
-DROP PROCEDURE IF EXISTS sp_ingven;
-DROP PROCEDURE IF EXISTS sp_modven;
-DROP PROCEDURE IF EXISTS sp_selven;
-
--- Eliminar tabla si existe
-DROP TABLE IF EXISTS `vendedor`;
-
--- Estructura de tabla para la tabla `vendedor`
-CREATE TABLE `vendedor` (
-  `id_ven` int(11) NOT NULL AUTO_INCREMENT,
-  `nom_ven` varchar(25) NOT NULL,
-  `apel_ven` varchar(25) NOT NULL,
-  `cel_ven` char(9) NOT NULL,
-  PRIMARY KEY (`id_ven`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Procedimientos almacenados
-DELIMITER $$
-
--- Procedimiento para buscar un vendedor por ID
-CREATE PROCEDURE `sp_busven` (IN `p_id_ven` INT)   
-BEGIN
-    SELECT * FROM vendedor 
-    WHERE id_ven = p_id_ven;
-END$$
-
--- Procedimiento para eliminar un vendedor
-CREATE PROCEDURE `sp_delven` (IN `p_id_ven` INT)   
-BEGIN
-    DELETE FROM vendedor 
-    WHERE id_ven = p_id_ven;
-END$$
-
--- Procedimiento para insertar un nuevo vendedor
-CREATE PROCEDURE `sp_ingven` (IN `p_nom_ven` VARCHAR(25), IN `p_apel_ven` VARCHAR(25), IN `p_cel_ven` CHAR(9))   
-BEGIN
-    INSERT INTO vendedor (nom_ven, apel_ven, cel_ven)
-    VALUES (p_nom_ven, p_apel_ven, p_cel_ven);
-    SELECT LAST_INSERT_ID() AS nuevo_id_vendedor;
-END$$
-
--- Procedimiento para modificar un vendedor existente
-CREATE PROCEDURE `sp_modven` (IN `p_id_ven` INT, IN `p_nom_ven` VARCHAR(25), IN `p_apel_ven` VARCHAR(25), IN `p_cel_ven` CHAR(9))   
-BEGIN
-    UPDATE vendedor 
-    SET 
-        nom_ven = p_nom_ven,
-        apel_ven = p_apel_ven,
-        cel_ven = p_cel_ven
-    WHERE id_ven = p_id_ven;
-END$$
-
-DELIMITER ;
-```
-
-## Instalación
+## Configuración del Entorno
 
 1. Clona este repositorio:
 ```bash
-git clone <url-del-repositorio>
-```
-
-2. Navega al directorio del proyecto:
-```bash
+git clone https://github.com/AndersonFlores2006/node_clase.git
 cd node_clase
 ```
 
-3. Instala las dependencias:
+2. Instala las dependencias:
 ```bash
 npm install
 ```
 
-4. Configura la conexión a la base de datos:
-   - Abre el archivo `app/db.js`
-   - La configuración actual está configurada para Railway:
-```javascript
-const pool = mysql.createPool({
-  host: "metro.proxy.rlwy.net",
-  user: "root",
-  password: "CaCCQPMlJGquCrnImlacApdzKmACfHui",
-  port: 41613,
-  database: "railway",
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+3. Configura las variables de entorno:
+   * Crea un archivo `.env` en la raíz del proyecto
+   * Copia el siguiente contenido y ajusta los valores según tu configuración:
+```env
+DB_HOST=tu_host
+DB_USER=tu_usuario
+DB_PASSWORD=tu_contraseña
+DB_PORT=tu_puerto
+DB_DATABASE=railway
+DB_CONNECTION_LIMIT=10
 ```
 
-## Ejecución
+## Ejecución con Docker (Recomendado)
 
-El proyecto tiene dos modos de ejecución:
+1. Asegúrate de tener Docker y Docker Compose instalados
+2. Ejecuta:
+```bash
+docker compose up
+```
+
+La aplicación estará disponible en `http://localhost:3000`
+
+## Ejecución Local
 
 ### Modo Desarrollo
-Este modo incluye recarga automática cuando se detectan cambios en el código:
 ```bash
 npm run dev
 ```
 
 ### Modo Producción
-Para ejecutar en modo producción:
 ```bash
 npm start
 ```
 
-Una vez iniciado, abre tu navegador y visita:
-```
-http://localhost:3000
-```
+## Estructura de la Base de Datos
 
-## Uso de la Aplicación
+### Tabla Vendedor
+- id_ven (INT, Primary Key, Auto-increment)
+- nom_ven (VARCHAR(25))
+- apel_ven (VARCHAR(25))
+- cel_ven (CHAR(9))
+- id_distrito (INT, Foreign Key)
+- id_cargo (INT)
 
-### Gestión de Vendedores
-- Para agregar un nuevo vendedor, completa el formulario en la parte superior
-- Para editar un vendedor, haz clic en el botón "Editar" en la fila correspondiente
-- Para eliminar un vendedor, haz clic en el botón "Eliminar" en la fila correspondiente
-- Para buscar vendedores, utiliza el campo de búsqueda que filtra por nombre, apellido o celular
+### Tabla Distrito
+- id_distrito (INT, Primary Key, Auto-increment)
+- nombre (VARCHAR(50))
 
-### Exportación de Datos
-- Para exportar a Excel, haz clic en el botón "Exportar Excel"
-  - Se descargará un archivo `Vendedores.xlsx` con todos los registros
-- Para exportar a PDF, haz clic en el botón "Exportar PDF"
-  - Se descargará un archivo `Vendedores.pdf` con un reporte formateado
+## API Endpoints
+
+### Vendedores
+- GET `/api/vendedores` - Listar todos los vendedores
+- GET `/api/vendedores/:id` - Obtener un vendedor por ID
+- POST `/api/vendedores` - Crear nuevo vendedor
+- PUT `/api/vendedores/:id` - Actualizar vendedor
+- DELETE `/api/vendedores/:id` - Eliminar vendedor
+- GET `/api/vendedores/search` - Buscar vendedores
+
+### Distritos
+- GET `/api/distritos` - Listar todos los distritos
 
 ## Tecnologías Utilizadas
 
-- Frontend:
-  - HTML5
-  - CSS3 (Bootstrap 5)
-  - JavaScript (Vanilla)
-  - Bootstrap Icons
-- Backend:
-  - Node.js
-  - Express.js
-  - MySQL2 (con soporte para promesas)
-  - XLSX (para exportación a Excel)
-  - PDFMake (para exportación a PDF)
-  - Nodemon (desarrollo)
-- Base de Datos:
-  - MySQL (Railway)
+### Frontend
+- HTML5
+- CSS3 (Bootstrap 5)
+- JavaScript (Vanilla)
+- Bootstrap Icons
+
+### Backend
+- Node.js
+- Express.js
+- MySQL2 (con soporte para promesas)
+- XLSX (para exportación a Excel)
+- PDFMake (para exportación a PDF)
+- Nodemon (desarrollo)
+- dotenv (variables de entorno)
+
+### Base de Datos
+- MySQL
+
+### Contenedores
+- Docker
+- Docker Compose
 
 ## Estructura del Proyecto
-
 ```
 node_clase/
 ├── app/
-│   ├── view/
+│   ├── controllers/
+│   │   └── vendedorController.js
+│   │   └── distritoController.js
+│   ├── models/
+│   │   └── Vendedor.js
+│   ├── views/
 │   │   ├── js/
 │   │   │   ├── main.js
 │   │   │   └── modals.js
 │   │   └── index.html
-│   ├── create/
-│   │   └── createVendedor.js
-│   ├── update/
-│   │   └── updateVendedor.js
-│   ├── delete/
-│   │   └── deleteVendedor.js
 │   ├── db.js
+│   ├── railway_procedures.sql
 │   └── server.js
+├── .env
+├── .gitignore
+├── docker-compose.yml
+├── Dockerfile
 ├── package.json
-├── requirements.txt
 └── README.md
 ```
 
+## Seguridad
+- Variables de entorno para credenciales sensibles
+- Validación de datos en frontend y backend
+- Sanitización de entradas de usuario
+- Manejo de errores robusto
+
 ## Contribución
 
-Si deseas contribuir al proyecto:
 1. Haz un fork del repositorio
 2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)

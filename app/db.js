@@ -1,13 +1,14 @@
+require('dotenv').config();
 const mysql = require("mysql2/promise");
 
 const pool = mysql.createPool({
-  host: "metro.proxy.rlwy.net",
-  user: "root",
-  password: "CaCCQPMlJGquCrnImlacApdzKmACfHui",
-  port: 41613,
-  database: "railway",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
+  database: process.env.DB_DATABASE,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT) || 10,
   queueLimit: 0
 });
 
