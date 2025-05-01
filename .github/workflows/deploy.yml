@@ -37,9 +37,12 @@ jobs:
           npm test || echo "No tests configured, skipping..."
 
       - name: Deploy to Render
+        env:
+          RENDER_SERVICE_ID: srv-d09aoc6uk2gs73d2nf60
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
           echo "Triggering Render deployment..."
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.render.com/deploy/srv-d09aoc6uk2gs73d2nf60?key=9sHYZuZXV6M")
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.render.com/deploy/$RENDER_SERVICE_ID?key=$RENDER_API_KEY")
           HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | head -n-1)
           
