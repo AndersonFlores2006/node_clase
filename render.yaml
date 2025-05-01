@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: node-clase
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: MYSQL_HOST
+        value: ${MYSQL_HOST}
+      - key: MYSQL_USER
+        value: ${MYSQL_USER}
+      - key: MYSQL_PASSWORD
+        value: ${MYSQL_PASSWORD}
+      - key: MYSQL_DATABASE
+        value: ${MYSQL_DATABASE}
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /
+    autoDeploy: true 

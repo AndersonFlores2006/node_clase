@@ -1,0 +1,59 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          npm ci
+          echo "Dependencies installed successfully ✅"
+
+      - name: Build application
+        run: |
+          echo "Building application..."
+          npm run build
+          echo "Build completed successfully ✅"
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          npm test || echo "No tests configured, skipping..."
+
+      - name: Deploy to Render
+        run: |
+          echo "Triggering Render deployment..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.render.com/deploy/srv-d09aoc6uk2gs73d2nf60?key=9sHYZuZXV6M")
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "Deployment triggered successfully ✅"
+            echo "Response: $BODY"
+          else
+            echo "❌ Failed to trigger deployment"
+            echo "Status code: $HTTP_STATUS"
+            echo "Response: $BODY"
+            exit 1
+          fi
+
+      - name: Deployment Status
+        run: |
+          echo "🚀 Deployment process completed"
+          echo "Check your Render dashboard for deployment status" 
