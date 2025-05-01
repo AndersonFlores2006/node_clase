@@ -9,6 +9,24 @@ Este es un sistema web para la gestión de vendedores que permite realizar opera
 * npm (incluido con Node.js)
 * Docker y Docker Compose (opcional, para desarrollo con contenedores)
 
+## Configuración del Entorno
+
+Para ejecutar la aplicación, necesitas configurar las siguientes variables de entorno en un archivo `.env`:
+
+```env
+# Database Configuration
+DB_HOST=your_host
+DB_USER=your_user
+DB_PASSWORD=your_password
+DB_PORT=your_port
+DB_DATABASE=your_database
+DB_CONNECTION_LIMIT=10
+
+# Server Configuration
+NODE_ENV=development
+PORT=3000
+```
+
 ## Características
 
 * ✅ Registro de vendedores con información completa
@@ -26,52 +44,38 @@ Este es un sistema web para la gestión de vendedores que permite realizar opera
 * ✅ Gestión de distritos
 * ✅ Gestión de cargos
 
-## Configuración del Entorno
+## Instalación y Ejecución
 
-1. Clona este repositorio:
+1. Clonar el repositorio:
 ```bash
 git clone https://github.com/AndersonFlores2006/node_clase.git
 cd node_clase
 ```
 
-2. Instala las dependencias:
+2. Instalar dependencias:
 ```bash
 npm install
 ```
 
-3. Configura las variables de entorno:
-   * Crea un archivo `.env` en la raíz del proyecto
-   * Copia el siguiente contenido y ajusta los valores según tu configuración:
-```env
-DB_HOST=tu_host
-DB_USER=tu_usuario
-DB_PASSWORD=tu_contraseña
-DB_PORT=tu_puerto
-DB_DATABASE=railway
-DB_CONNECTION_LIMIT=10
+3. Crear archivo `.env` con las variables de entorno necesarias (ver sección de Configuración del Entorno)
+
+4. Iniciar la aplicación:
+```bash
+npm start
 ```
 
-## Ejecución con Docker (Recomendado)
+## Desarrollo con Docker
 
 1. Asegúrate de tener Docker y Docker Compose instalados
-2. Ejecuta:
+2. Configura las variables de entorno en el archivo `.env`
+3. Ejecuta:
 ```bash
 docker compose up
 ```
 
-La aplicación estará disponible en `http://localhost:3000`
+## Despliegue en Render
 
-## Ejecución Local
-
-### Modo Desarrollo
-```bash
-npm run dev
-```
-
-### Modo Producción
-```bash
-npm start
-```
+La aplicación está configurada para desplegarse en Render. Asegúrate de configurar las variables de entorno en el panel de configuración de Render.
 
 ## Estructura de la Base de Datos
 

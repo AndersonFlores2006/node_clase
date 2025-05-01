@@ -17,6 +17,8 @@ async function testConnection() {
   try {
     const connection = await pool.getConnection();
     console.log("Conexión exitosa a la base de datos");
+    console.log("Host:", process.env.DB_HOST);
+    console.log("Database:", process.env.DB_DATABASE);
 
     // Realizar una consulta de prueba
     const [rows] = await connection.query("SELECT 1");
@@ -26,6 +28,7 @@ async function testConnection() {
     return true;
   } catch (error) {
     console.error("Error al conectar a la base de datos:", error.message);
+    console.error("Verifica que las variables de entorno estén configuradas correctamente");
     return false;
   }
 }
@@ -33,5 +36,5 @@ async function testConnection() {
 // Ejecutar la prueba de conexión
 testConnection();
 
-module.exports = { pool };
+module.exports = { pool, testConnection };
 
