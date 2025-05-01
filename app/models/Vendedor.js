@@ -27,8 +27,8 @@ class Vendedor {
         return result[0][0].nuevo_id_vendedor;
     }
 
-    static async update(id, nom_ven, apel_ven, cel_ven, id_distrito) {
-        await pool.query('CALL sp_modven(?, ?, ?, ?, ?)', [id, nom_ven, apel_ven, cel_ven, id_distrito || null]);
+    static async update(id, nom_ven, apel_ven, cel_ven, id_distrito, id_cargo) {
+        await pool.query('CALL sp_modven(?, ?, ?, ?, ?, ?)', [id, nom_ven, apel_ven, cel_ven, id_distrito || null, id_cargo || null]);
         return true;
     }
 

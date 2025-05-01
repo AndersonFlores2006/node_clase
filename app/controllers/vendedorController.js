@@ -62,7 +62,7 @@ class VendedorController {
     static async update(req, res) {
         try {
             const { id } = req.params;
-            const { nom_ven, apel_ven, cel_ven, id_distrito } = req.body;
+            const { nom_ven, apel_ven, cel_ven, id_distrito, id_cargo } = req.body;
 
             // Validaciones
             if (!nom_ven || nom_ven.trim() === '') {
@@ -75,7 +75,7 @@ class VendedorController {
                 return res.status(400).json({ error: 'El número de celular debe tener 9 dígitos' });
             }
 
-            await Vendedor.update(id, nom_ven, apel_ven, cel_ven, id_distrito);
+            await Vendedor.update(id, nom_ven, apel_ven, cel_ven, id_distrito, id_cargo);
             res.json({ success: true, message: 'Vendedor actualizado correctamente' });
         } catch (error) {
             console.error('Error al actualizar vendedor:', error);

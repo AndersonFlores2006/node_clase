@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS Vendedor (
     apel_ven VARCHAR(25) NOT NULL,
     cel_ven CHAR(9) NOT NULL,
     id_distrito INT,
+    id_cargo INT,
     FOREIGN KEY (id_distrito) REFERENCES Distrito(id_distrito) ON DELETE SET NULL
 );
 
@@ -89,7 +90,8 @@ CREATE PROCEDURE sp_modven(
     IN p_nom_ven VARCHAR(25),
     IN p_apel_ven VARCHAR(25),
     IN p_cel_ven CHAR(9),
-    IN p_id_distrito INT
+    IN p_id_distrito INT,
+    IN p_id_cargo INT
 )
 BEGIN
     DECLARE vendedor_exists INT;
@@ -127,7 +129,8 @@ BEGIN
     SET nom_ven = p_nom_ven,
         apel_ven = p_apel_ven,
         cel_ven = p_cel_ven,
-        id_distrito = p_id_distrito
+        id_distrito = p_id_distrito,
+        id_cargo = p_id_cargo
     WHERE id_ven = p_id_ven;
 END //
 DELIMITER ;
