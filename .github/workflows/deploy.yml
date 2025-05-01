@@ -43,8 +43,8 @@ jobs:
         run: |
           echo "Triggering Render deployment..."
           echo "Debug - Service ID: ${RENDER_SERVICE_ID:0:4}..." # Muestra solo los primeros 4 caracteres por seguridad
-          DEPLOY_URL="https://api.render.com/deploy/$RENDER_SERVICE_ID?key=$RENDER_API_KEY"
-          echo "Debug - URL structure (with masked key): https://api.render.com/deploy/$RENDER_SERVICE_ID?key=****"
+          DEPLOY_URL="https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys?key=$RENDER_API_KEY"
+          echo "Debug - URL structure (with masked key): https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys?key=****"
           RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$DEPLOY_URL")
           HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
           BODY=$(echo "$RESPONSE" | head -n-1)
